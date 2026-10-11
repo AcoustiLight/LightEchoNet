@@ -1,0 +1,1946 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      LightEchoNet – Lightweight Audio Classification for Edge Devices
+    </title>
+
+    <!-- Font & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+
+    <!-- Medium Zoom for image zoom functionality -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.css"
+    />
+
+    <!-- MathJax for proper formula rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+      /* ---------- Reset & Base ---------- */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          system-ui,
+          sans-serif;
+        background: #f8fafc;
+        color: #0b1a2e;
+        line-height: 1.6;
+      }
+      a {
+        color: #2563eb;
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+
+      /* ---------- Header / Hero ---------- */
+      .hero {
+        background: linear-gradient(145deg, #0b1a2e 0%, #1a2f4a 100%);
+        color: #ffffff;
+        padding: 64px 0 56px;
+        border-bottom: 4px solid #3b82f6;
+      }
+      .hero h1 {
+        font-size: 3rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin-bottom: 8px;
+      }
+      .hero .tagline {
+        font-size: 1.25rem;
+        font-weight: 400;
+        color: #94a3b8;
+        margin-bottom: 20px;
+      }
+      .hero .badge-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px 24px;
+        margin-top: 16px;
+      }
+      .hero .badge-row span {
+        background: rgba(255, 255, 255, 0.08);
+        padding: 4px 14px;
+        border-radius: 40px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #e2e8f0;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+      }
+      .hero .badge-row i {
+        margin-right: 6px;
+        color: #60a5fa;
+      }
+      .hero .repo-link {
+        display: inline-block;
+        margin-top: 24px;
+        background: #2563eb;
+        color: #fff;
+        padding: 12px 32px;
+        border-radius: 40px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: background 0.2s;
+        border: none;
+        cursor: pointer;
+      }
+      .hero .repo-link i {
+        margin-right: 10px;
+      }
+      .hero .repo-link:hover {
+        background: #1d4ed8;
+        text-decoration: none;
+      }
+
+      /* ---------- Section common ---------- */
+      section {
+        padding: 56px 0;
+        border-bottom: 1px solid #e9edf2;
+      }
+      section:last-of-type {
+        border-bottom: none;
+      }
+      .section-title {
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .section-title i {
+        color: #2563eb;
+        font-size: 1.75rem;
+      }
+      .section-sub {
+        font-size: 1.1rem;
+        color: #334155;
+        max-width: 780px;
+        margin-bottom: 32px;
+      }
+
+      /* ---------- Cards / Layout ---------- */
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+      }
+      @media (max-width: 760px) {
+        .grid-2 {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .card {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 28px 28px 32px;
+        box-shadow:
+          0 4px 12px rgba(0, 0, 0, 0.03),
+          0 1px 2px rgba(0, 0, 0, 0.05);
+        border: 1px solid #eef2f6;
+        transition: box-shadow 0.2s;
+      }
+      .card:hover {
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
+      }
+      .card h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .card h3 i {
+        color: #2563eb;
+        width: 24px;
+        text-align: center;
+      }
+      .card p,
+      .card li {
+        color: #1e293b;
+      }
+      .card ul {
+        padding-left: 20px;
+        margin-top: 8px;
+      }
+      .card ul li {
+        margin-bottom: 6px;
+      }
+
+      /* ---------- Figures (diagrams) ---------- */
+      .figure-box {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 24px;
+        border: 1px solid #eef2f6;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        text-align: center;
+      }
+      .figure-box img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 12px;
+        background: #f1f5f9;
+        display: block;
+        margin: 0 auto 12px;
+      }
+      .figure-box .caption {
+        font-size: 0.95rem;
+        color: #475569;
+        margin-top: 8px;
+      }
+      .figure-box .caption i {
+        margin-right: 6px;
+        color: #64748b;
+      }
+
+      /* ---------- Abstract block ---------- */
+      .abstract-box {
+        background: #f1f5f9;
+        padding: 28px 32px;
+        border-radius: 20px;
+        border-left: 6px solid #2563eb;
+        margin: 20px 0 8px;
+      }
+      .abstract-box p {
+        font-size: 1.05rem;
+        color: #0b1a2e;
+      }
+
+      /* --- SVG showcase above abstract --- */
+      .model-svg-section {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 24px 24px 20px;
+        margin-bottom: 32px;
+        border: 1px solid #eef2f6;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+      }
+      .model-svg-section .svg-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+        color: #0b1a2e;
+      }
+      .model-svg-section .svg-title i {
+        color: #2563eb;
+        font-size: 1.6rem;
+      }
+      .model-svg-wrapper {
+        background: #fafcff;
+        border-radius: 16px;
+        padding: 12px;
+        border: 1px solid #e9edf2;
+        display: flex;
+        justify-content: center;
+        position: relative;
+        cursor: pointer;
+      }
+      .model-svg-wrapper svg,
+      .model-svg-wrapper img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+      }
+      /* Zoom hint overlay */
+      .model-svg-wrapper .zoom-hint {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.7);
+        color: #fff;
+        padding: 8px 14px;
+        border-radius: 30px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        pointer-events: none;
+        opacity: 0.7;
+        transition: opacity 0.3s;
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .model-svg-wrapper:hover .zoom-hint {
+        opacity: 1;
+      }
+      .model-svg-section .svg-caption {
+        text-align: center;
+        margin-top: 12px;
+        font-size: 0.95rem;
+        color: #475569;
+      }
+      .model-svg-section .svg-caption i {
+        margin-right: 6px;
+        color: #64748b;
+      }
+
+      /* Medium-zoom overrides for better UX */
+      .medium-zoom-overlay {
+        background: rgba(229, 231, 235, 0.92) !important;
+        backdrop-filter: blur(4px);
+      }
+      .medium-zoom-image {
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      }
+
+      /* ---------- Results table ---------- */
+      .results-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95rem;
+      }
+      .results-table th {
+        text-align: left;
+        padding: 12px 16px 10px 0;
+        font-weight: 600;
+        border-bottom: 2px solid #dce2ea;
+        color: #0b1a2e;
+      }
+      .results-table td {
+        padding: 10px 16px 10px 0;
+        border-bottom: 1px solid #e9edf2;
+      }
+      .results-table tr:last-child td {
+        border-bottom: none;
+      }
+      .results-table .highlight {
+        font-weight: 600;
+        color: #2563eb;
+      }
+
+      /* ---------- Footer ---------- */
+      .footer {
+        background: #f1f5f9;
+        padding: 32px 0;
+        text-align: center;
+        color: #475569;
+        font-size: 0.95rem;
+        border-top: 1px solid #e2e8f0;
+      }
+      .footer i {
+        color: #2563eb;
+      }
+
+      /* ---------- Responsive tweaks ---------- */
+      @media (max-width: 600px) {
+        .hero h1 {
+          font-size: 2.2rem;
+        }
+        .hero .tagline {
+          font-size: 1rem;
+        }
+        .section-title {
+          font-size: 1.6rem;
+        }
+        .abstract-box {
+          padding: 20px;
+        }
+        .card {
+          padding: 20px;
+        }
+        .model-svg-section .svg-title {
+          font-size: 1.25rem;
+        }
+        .model-svg-wrapper .zoom-hint {
+          font-size: 0.7rem;
+          padding: 5px 10px;
+          bottom: 12px;
+          right: 12px;
+        }
+      }
+
+      /* ---------- Architecture detail sections ---------- */
+      .arch-detail {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 32px;
+        align-items: flex-start;
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 28px 28px 32px;
+        border: 1px solid #eef2f6;
+        margin-bottom: 32px;
+      }
+      .arch-detail .text {
+        flex: 1 1 45%;
+        min-width: 280px;
+      }
+      .arch-detail .image {
+        flex: 1 1 45%;
+        min-width: 280px;
+        text-align: center;
+      }
+      .arch-detail .image img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 12px;
+        border: 1px solid #e9edf2;
+        background: #fafcff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+        cursor: pointer;
+      }
+      .arch-detail .image .fig-caption {
+        margin-top: 8px;
+        font-size: 0.9rem;
+        color: #475569;
+      }
+      .arch-detail .image .fig-caption i {
+        margin-right: 6px;
+        color: #64748b;
+      }
+      .arch-detail h4 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: #0b1a2e;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .arch-detail h4 i {
+        color: #2563eb;
+      }
+      .arch-detail p {
+        color: #1e293b;
+        margin-bottom: 12px;
+      }
+      .arch-detail ul {
+        padding-left: 20px;
+        color: #1e293b;
+      }
+      .arch-detail ul li {
+        margin-bottom: 6px;
+      }
+
+      /* Only for the staged KD subsection: text wraps beside the image,
+           then automatically uses the full container width below it. */
+      .arch-detail-flow {
+        display: block;
+      }
+      .arch-detail-flow::after {
+        content: "";
+        display: table;
+        clear: both;
+      }
+      .arch-detail-flow .image {
+        float: right;
+        width: calc(50% - 16px);
+        min-width: 0;
+        margin: 0 0 24px 32px;
+      }
+      .arch-detail-flow .text {
+        min-width: 0;
+      }
+      @media (max-width: 760px) {
+        .arch-detail-flow .image {
+          float: none;
+          width: 100%;
+          margin: 0 0 24px;
+        }
+      }
+
+      /* equations */
+      .equation {
+        background: #f8fafc;
+        padding: 12px 20px;
+        border-radius: 12px;
+        margin: 16px 0;
+        overflow-x: auto;
+        border-left: 4px solid #2563eb;
+        font-size: 0.95rem;
+      }
+      .equation-block {
+        background: #f8fafc;
+        padding: 16px 20px;
+        border-radius: 12px;
+        margin: 16px 0;
+        overflow-x: auto;
+        border-left: 4px solid #2563eb;
+      }
+
+      /* ---------- New deployment table styles ---------- */
+      .deployment-table-wrap {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 28px 32px;
+        border: 1px solid #eef2f6;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        overflow-x: auto;
+      }
+      .deployment-table-wrap table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95rem;
+        margin-top: 8px;
+      }
+      .deployment-table-wrap th {
+        text-align: left;
+        padding: 12px 16px 10px 0;
+        font-weight: 600;
+        border-bottom: 2px solid #dce2ea;
+        color: #0b1a2e;
+      }
+      .deployment-table-wrap td {
+        padding: 10px 16px 10px 0;
+        border-bottom: 1px solid #e9edf2;
+      }
+      .deployment-table-wrap tr:last-child td {
+        border-bottom: none;
+      }
+      .deployment-table-wrap .highlight {
+        font-weight: 600;
+        color: #2563eb;
+      }
+      .deployment-table-wrap .table-caption {
+        margin-top: 16px;
+        font-size: 0.95rem;
+        color: #475569;
+      }
+      .deployment-table-wrap .table-caption i {
+        margin-right: 6px;
+        color: #64748b;
+      }
+
+      /* ---- TAU generalization section (compact ResNet) ---- */
+      .tau-generalization {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 28px 32px;
+        border: 1px solid #eef2f6;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        margin-top: 8px;
+      }
+      .tau-generalization h4 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin: 24px 0 12px;
+        color: #0b1a2e;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .tau-generalization h4 i {
+        color: #2563eb;
+      }
+      .tau-generalization h4:first-of-type {
+        margin-top: 0;
+      }
+      .tau-generalization p {
+        color: #1e293b;
+        margin-bottom: 16px;
+      }
+      .tau-generalization ul {
+        padding-left: 20px;
+        color: #1e293b;
+        margin-bottom: 16px;
+      }
+      .tau-generalization ul li {
+        margin-bottom: 6px;
+      }
+      .tau-generalization .fig-block {
+        text-align: center;
+        margin: 24px 0;
+      }
+      .tau-generalization .fig-block img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 12px;
+        border: 1px solid #e9edf2;
+        background: #fafcff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+        cursor: pointer;
+      }
+      .tau-generalization .fig-block .fig-caption {
+        margin-top: 8px;
+        font-size: 0.9rem;
+        color: #475569;
+      }
+      .tau-generalization .fig-block .fig-caption i {
+        margin-right: 6px;
+        color: #64748b;
+      }
+      .tau-generalization table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95rem;
+        margin-top: 12px;
+      }
+      .tau-generalization th {
+        text-align: left;
+        padding: 12px 16px 10px 0;
+        font-weight: 600;
+        border-bottom: 2px solid #dce2ea;
+        color: #0b1a2e;
+      }
+      .tau-generalization td {
+        padding: 10px 16px 10px 0;
+        border-bottom: 1px solid #e9edf2;
+      }
+      .tau-generalization tr:last-child td {
+        border-bottom: none;
+      }
+      .tau-generalization .highlight {
+        font-weight: 600;
+        color: #2563eb;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ==================== HERO ==================== -->
+    <header class="hero">
+      <div class="container">
+        <h1>🔊 LightEchoNet</h1>
+        <div class="tagline">
+          Lightweight audio classification for edge devices &bull; &lt;128 KB
+          &bull; &lt;30 MMACs
+        </div>
+        <div class="badge-row">
+          <span><i class="fas fa-microchip"></i> 31.2K params</span>
+          <span><i class="fas fa-bolt"></i> 19.6 MMACs</span>
+          <span
+            ><i class="fas fa-database"></i> TAU · ESC‑50 · FSD50K ·
+            UrbanSound8K</span
+          >
+          <span
+            ><i class="fas fa-trophy"></i> 60.0% / 92.0% / 58.7% mAP /
+            97.4%</span
+          >
+        </div>
+        <a
+          class="repo-link"
+          href="https://github.com/kni5ht/LightEchoNet"
+          target="_blank"
+        >
+          <i class="fab fa-github"></i> View Code on GitHub
+        </a>
+      </div>
+    </header>
+
+    <!-- ==================== MODEL SVG (above abstract) ==================== -->
+    <section style="padding-bottom: 20px">
+      <div class="container">
+        <div class="model-svg-section">
+          <div class="svg-title">
+            <i class="fas fa-robot"></i> Model Architecture
+            <span
+              style="
+                font-size: 0.8rem;
+                font-weight: 400;
+                color: #64748b;
+                margin-left: auto;
+              "
+            >
+              <i class="fas fa-mouse-pointer"></i> Click to zoom
+            </span>
+          </div>
+          <div class="model-svg-wrapper" id="svg-zoom-container">
+            <img
+              src="images/Stu_Teachers_Detaileddd.svg"
+              alt="LightEchoNet teacher-student architecture diagram"
+              id="svg-zoom-image"
+              style="max-width: 100%; height: auto; display: block"
+              data-zoomable
+            />
+            <div class="zoom-hint">
+              <i class="fas fa-search-plus"></i> Click to zoom
+            </div>
+          </div>
+          <div class="svg-caption">
+            <i class="fas fa-sitemap"></i> Overview of the LightEchoNet
+            teacher–student architecture with two‑stage distillation flow.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== ABSTRACT ==================== -->
+    <section style="padding-top: 0">
+      <div class="container">
+        <div class="section-title">
+          <i class="fas fa-file-alt"></i> Abstract
+        </div>
+        <div class="abstract-box">
+          <p>
+            We present <strong>LightEchoNet</strong>, a lightweight audio
+            classification framework designed for resource-constrained devices.
+            Its compact CNN student provides strong standalone performance with
+            low parameter and computational costs. The Inner Block is
+            structurally aligned with the student and uses FusionConv blocks to
+            produce compatible intermediate representations without additional
+            projection modules. The proposed staged distillation strategy
+            combines normalized Huber-based feature matching and
+            temperature-scaled logit supervision from the Inner Block with
+            complementary output-level guidance from the Outer Block.
+          </p>
+
+          <p style="margin-top: 12px">
+            The final student achieves <strong>60.24%</strong> accuracy on TAU
+            using the official 25% development-training subset,
+            <strong>93.4%</strong> on ESC-50, and <strong>94.43%</strong> on
+            UrbanSound8K. For a one-second audio clip, the model requires only
+            <strong>31.2K parameters</strong>, <strong>28.6 MMACs</strong>, and
+            <strong>62.5 kB</strong> of storage in float16 format.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== MOTIVATION ==================== -->
+    <section>
+      <div class="container">
+        <div class="section-title">
+          <i class="fas fa-bullseye"></i> Motivation
+        </div>
+        <div
+          style="
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 28px 32px;
+            border: 1px solid #eef2f6;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+          "
+        >
+          <p style="font-size: 1.05rem; color: #0b1a2e; margin-bottom: 20px">
+            Deploying audio classification models on mobile, wearable, and
+            embedded devices is challenging because these platforms have strict
+            limits on memory, computation, storage, and power. Although large
+            pretrained models achieve strong performance, they are often too
+            expensive for practical deployment. Compact models are more
+            efficient, but reducing their size can weaken their ability to learn
+            robust audio representations, especially under background noise,
+            acoustic variability, and recording-device mismatch.
+          </p>
+          <h4
+            style="
+              font-weight: 600;
+              font-size: 1.1rem;
+              margin-bottom: 12px;
+              color: #0b1a2e;
+            "
+          >
+            Motivational Points
+          </h4>
+          <ul
+            style="
+              list-style: none;
+              padding: 0;
+              display: flex;
+              flex-direction: column;
+              gap: 10px;
+            "
+          >
+            <li
+              style="
+                display: flex;
+                align-items: flex-start;
+                gap: 12px;
+                color: #1e293b;
+              "
+            >
+              <i
+                class="fas fa-balance-scale"
+                style="
+                  color: #2563eb;
+                  margin-top: 4px;
+                  width: 20px;
+                  text-align: center;
+                "
+              ></i>
+              <span
+                ><strong>Accuracy–efficiency trade-off:</strong> Lightweight
+                models must remain accurate while using very few parameters and
+                operations.</span
+              >
+            </li>
+            <li
+              style="
+                display: flex;
+                align-items: flex-start;
+                gap: 12px;
+                color: #1e293b;
+              "
+            >
+              <i
+                class="fas fa-arrow-up"
+                style="
+                  color: #2563eb;
+                  margin-top: 4px;
+                  width: 20px;
+                  text-align: center;
+                "
+              ></i>
+              <span
+                ><strong>Limitations of conventional distillation:</strong>
+                Output-level knowledge distillation does not fully transfer the
+                teacher's intermediate representations.</span
+              >
+            </li>
+            <li
+              style="
+                display: flex;
+                align-items: flex-start;
+                gap: 12px;
+                color: #1e293b;
+              "
+            >
+              <i
+                class="fas fa-cubes"
+                style="
+                  color: #2563eb;
+                  margin-top: 4px;
+                  width: 20px;
+                  text-align: center;
+                "
+              ></i>
+              <span
+                ><strong>Architectural mismatch:</strong> Direct feature
+                matching is difficult when the teacher and student have
+                different structures and feature dimensions.</span
+              >
+            </li>
+            <li
+              style="
+                display: flex;
+                align-items: flex-start;
+                gap: 12px;
+                color: #1e293b;
+              "
+            >
+              <i
+                class="fas fa-microchip"
+                style="
+                  color: #2563eb;
+                  margin-top: 4px;
+                  width: 20px;
+                  text-align: center;
+                "
+              ></i>
+              <span
+                ><strong>No extra deployment cost:</strong> The student should
+                benefit from powerful teachers during training without
+                increasing its inference-time complexity.</span
+              >
+            </li>
+            <li
+              style="
+                display: flex;
+                align-items: flex-start;
+                gap: 12px;
+                color: #1e293b;
+              "
+            >
+              <i
+                class="fas fa-handshake"
+                style="
+                  color: #2563eb;
+                  margin-top: 4px;
+                  width: 20px;
+                  text-align: center;
+                "
+              ></i>
+              <span
+                ><strong>Complementary supervision:</strong> Combining a
+                structurally aligned inner teacher with a strong outer teacher
+                can provide both feature-level and output-level guidance.</span
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== ARCHITECTURE DETAILS (renamed) ==================== -->
+    <section>
+      <div class="container">
+        <div class="section-title">
+          <i class="fas fa-project-diagram"></i> Architecture Details
+        </div>
+
+        <!-- ---- Subsection 1: Shared Student–Inner-Teacher Backbone ---- -->
+        <div class="arch-detail arch-detail-flow">
+          <div class="image">
+            <img
+              src="images/Student-LE-New.svg"
+              alt="Shared Student–Inner-Teacher Backbone"
+              data-zoomable
+            />
+            <div class="fig-caption">
+              <i class="fas fa-image"></i> Figure 1: Shared LE architecture for
+              student and inner teacher.
+            </div>
+          </div>
+          <div class="text">
+            <h4>
+              <i class="fas fa-sitemap"></i> Shared Student–Inner-Teacher
+              Backbone
+            </h4>
+            <p>
+              <strong>Figure 1</strong> presents the structurally aligned Light
+              Echo architectures used by the compact student and the inner
+              teacher. Both networks follow the same stage organization and
+              feature dimensions, containing seven LE Blocks arranged as 3+1+3
+              blocks and nine T–S Block positions in total. This shared
+              structure allows their intermediate features to be compared
+              directly without additional projection layers.
+            </p>
+            <p>
+              A <strong>T–S Block</strong> is a shared architectural position
+              whose implementation depends on the network:
+            </p>
+            <ul>
+              <li>
+                In the <strong>student</strong>, it is implemented as a standard
+                3×3 convolution.
+              </li>
+              <li>
+                In the <strong>inner teacher</strong>, it is replaced by the
+                more expressive <strong>FusionBlock</strong>, also referred to
+                as <em>FusionConv</em>. As detailed in Figure 2, this block
+                processes features through parallel 3×3, 5×5, 7×7, and 3×1
+                convolutional branches, followed by Batch Normalization,
+                concatenation, and a 1×1 fusion convolution.
+              </li>
+            </ul>
+            <p>
+              Seven of the nine T–S Blocks appear inside the seven LE Blocks,
+              while the remaining two are located in the convolutional stem.
+              Each LE Block contains two branches. The
+              <em>transformation branch</em> applies Batch Normalization, a 1×1
+              pointwise convolution, LeakyReLU, another Batch Normalization
+              layer, a depthwise T–S operation, and a second LeakyReLU. The
+              <em>projection branch</em> applies a pointwise convolution
+              directly to the input, and the outputs of the two branches are
+              added through a residual connection. <strong>ResNorm</strong> is
+              used between the main stages, while <strong>AttnGAP</strong>,
+              Batch Normalization, dropout, and a linear layer form the final
+              classification head.
+            </p>
+          </div>
+        </div>
+
+        <!-- ---- Subsection 2: Staged Inner–Outer Knowledge Distillation ---- -->
+        <div class="arch-detail arch-detail-flow">
+          <div class="image">
+            <img
+              src="images/ICASSP2027_WithoutBlock.svg"
+              alt="Staged Inner–Outer Knowledge Distillation"
+              data-zoomable
+            />
+            <div class="fig-caption">
+              <i class="fas fa-image"></i> Figure 2: Staged distillation
+              pipeline with inner and outer teachers.
+            </div>
+          </div>
+          <div class="text">
+            <h4>
+              <i class="fas fa-chalkboard-teacher"></i> Staged Inner–Outer
+              Knowledge Distillation
+            </h4>
+            <p>
+              <strong>Figure 2</strong> illustrates the proposed staged
+              distillation pipeline. First, the structurally aligned inner
+              teacher transfers both intermediate representations and
+              output-level knowledge to the student. Because the two networks
+              have matching stages and feature dimensions, features from four
+              approximately evenly spaced layers can be matched directly. The
+              student is then refined using an outer teacher, which can be
+              either a single high-performance model or an ensemble of teachers.
+            </p>
+            <p>The framework therefore combines three forms of supervision:</p>
+            <ul>
+              <li>
+                <strong>Label supervision</strong>, using cross-entropy with the
+                ground-truth labels.
+              </li>
+              <li>
+                <strong>Inner distillation</strong>, consisting of
+                temperature-scaled logit distillation and normalized Huber-based
+                feature matching.
+              </li>
+              <li>
+                <strong>Outer distillation</strong>, using temperature-scaled
+                output probabilities from a single teacher or the average
+                prediction of an ensemble.
+              </li>
+            </ul>
+            <p>
+              Let \(z_s\), \(z_i\), and \(z_o\) denote the logits of the
+              student, inner teacher, and a single outer teacher, respectively.
+              The outer-teacher target is:
+            </p>
+            <div class="equation">
+              \[ p_{o}^{T} = \begin{cases}
+              \operatorname{softmax}\!\left(\dfrac{z_o}{T}\right), &
+              \text{single model}, \\[8pt]
+              \dfrac{1}{K}\displaystyle\sum_{k=1}^{K}
+              \operatorname{softmax}\!\left(\dfrac{z_k}{T}\right), &
+              \text{ensemble}. \end{cases} \]
+            </div>
+            <p>The distillation distributions are defined as:</p>
+            <div class="equation">
+              \[ p_{t}^{T} = \begin{cases}
+              \operatorname{softmax}\!\left(\dfrac{z_i}{T}\right), & \text{inner
+              KD}, \\[8pt] p_o^T, & \text{outer KD}, \end{cases} \qquad p_s^T =
+              \operatorname{softmax}\!\left(\dfrac{z_s}{T}\right). \]
+            </div>
+            <p>
+              For feature-level inner distillation, student and inner-teacher
+              features at layer \(l\) are \(\ell_2\)-normalized:
+            </p>
+            <div class="equation">
+              \[ \widehat{F}_s^{(l)} = \frac{F_s^{(l)}} {\left\lVert F_s^{(l)}
+              \right\rVert_2+\varepsilon}, \qquad \widehat{F}_i^{(l)} =
+              \frac{F_i^{(l)}} {\left\lVert F_i^{(l)}
+              \right\rVert_2+\varepsilon}. \]
+            </div>
+            <p>
+              The feature-matching loss over the aligned layer set \(S\) is:
+            </p>
+            <div class="equation">
+              \[ \mathcal{L}_{\mathrm{feat}} = \frac{1}{|S|} \sum_{l\in S}
+              \frac{1}{N_l} \sum_{j=1}^{N_l} \rho_{\delta} \left(
+              \widehat{f}_{s,j}^{(l)} - \operatorname{sg} \left(
+              \widehat{f}_{i,j}^{(l)} \right) \right), \]
+            </div>
+            <p>
+              where \(\operatorname{sg}(\cdot)\) stops gradients through the
+              teacher and \(\delta = 1\). The Huber function is:
+            </p>
+            <div class="equation">
+              \[ \rho_{\delta}(u) = \begin{cases} \dfrac{1}{2}u^2, &
+              |u|\leq\delta, \\[8pt] \delta\left(|u|-\dfrac{\delta}{2}\right), &
+              \text{otherwise}. \end{cases} \]
+            </div>
+            <p>The complete inner-distillation objective is:</p>
+            <div class="equation">
+              \[ \mathcal{L} = (1-\alpha)\, \mathcal{L}_{\mathrm{CE}}(z_s,y) +
+              \alpha T^2\, \mathcal{L}_{\mathrm{KL}} \left( p_t^T \,\Vert\,
+              p_s^T \right) + \beta\, \mathcal{L}_{\mathrm{feat}}. \]
+            </div>
+            <p>
+              Here, \(\alpha\) balances ground-truth and logit supervision,
+              while \(\beta\) controls feature matching. During outer-teacher
+              refinement, supervision is provided through cross-entropy and
+              output-level KL distillation, without inner feature matching.
+              After training, both teachers are discarded, so the final deployed
+              model retains exactly the student's original architecture and
+              inference cost.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAU GENERALIZATION (REVISED SECTION) ==================== -->
+
+    <section>
+      <div class="container">
+        <div class="section-title">
+          <i class="fas fa-expand-arrows-alt"></i> Generalization to Compact
+          ResNet-20 (TAU)
+        </div>
+
+        <div class="tau-generalization">
+          <p>
+            To examine whether the proposed structurally aligned inner–outer
+            knowledge-distillation framework is specific to the lightweight
+            backbone introduced in the main experiments, we additionally
+            instantiate the same framework on a substantially different
+            architecture:
+            <strong>a compact ResNet-20</strong>. This experiment is designed as
+            a controlled backbone-generalization study. The residual backbone is
+            changed, whereas the TAU data protocol, staged distillation
+            procedure, feature-matching formulation, and outer-teacher setting
+            are kept consistent with the main framework.
+          </p>
+
+          <p>
+            The objective is therefore not to introduce a second task-specific
+            architecture, but to determine whether the central principle of the
+            proposed method—pairing lightweight student operators with
+            structurally compatible higher-capacity inner-teacher
+            operators—remains effective within a conventional residual network.
+          </p>
+
+          <!-- ==================== COMPACT RESNET-20 ==================== -->
+          <h4><i class="fas fa-layer-group"></i> Compact ResNet-20 Student</h4>
+
+          <p>
+            We retain the complete depth and residual organization of ResNet-20
+            rather than obtaining a smaller model by deleting residual blocks.
+            The network is made lightweight primarily by reducing its channel
+            width and limiting the computational cost of the input stem.
+            Specifically, the three residual stages use channel widths
+          </p>
+
+          <div
+            style="
+              background: #f8fafc;
+              padding: 8px 16px;
+              border-radius: 8px;
+              display: inline-block;
+              font-family: monospace;
+              margin: 4px 0 16px;
+            "
+          >
+            [8, 16, 32]
+          </div>
+
+          <p>
+            which corresponds to a half-width version of the conventional
+            <code>[16, 32, 64]</code> ResNet-20 channel schedule. A
+            <strong>3×3 stride-2 convolution</strong> is used as the input stem,
+            followed by Batch Normalization and ReLU, without an additional
+            max-pooling layer. Early spatial reduction lowers the cost of
+            processing the 256×64 TAU Mel representation while preserving the
+            complete residual hierarchy.
+          </p>
+
+          <p>
+            Each of the three stages contains three BasicBlocks, giving the
+            following backbone:
+          </p>
+
+          <div
+            style="
+              background: #f8fafc;
+              padding: 12px 20px;
+              border-radius: 12px;
+              font-family: monospace;
+              font-size: 0.9rem;
+              margin: 8px 0 16px;
+              overflow-x: auto;
+            "
+          >
+            3×3 Stem (stride 2)<br />
+            → 3 × BasicBlock(8)<br />
+            → 3 × BasicBlock(16)<br />
+            → 3 × BasicBlock(32)<br />
+            → Global Average Pooling<br />
+            → 10-class Linear Classifier
+          </div>
+
+          <p>
+            Spatial downsampling and channel expansion occur only in the first
+            BasicBlocks of Stages 2 and 3. Thus, the model preserves the
+            defining three-stage, nine-BasicBlock organization of ResNet-20
+            while using a substantially narrower feature hierarchy.
+          </p>
+
+          <!-- ==================== NINE T-S POSITIONS ==================== -->
+          <h4>
+            <i class="fas fa-arrows-alt-h"></i> Nine Structurally Aligned T–S
+            Positions
+          </h4>
+
+          <p>
+            ResNet-20 contains exactly nine BasicBlocks, which provides a
+            natural mapping to the nine teacher–student positions used by our
+            framework. In every BasicBlock, we designate the
+            <strong>second residual operator (Conv2)</strong> as the aligned T–S
+            position:
+          </p>
+
+          <div
+            style="
+              background: #f8fafc;
+              padding: 12px 20px;
+              border-radius: 12px;
+              font-family: monospace;
+              font-size: 0.9rem;
+              margin: 8px 0 16px;
+              overflow-x: auto;
+            "
+          >
+            T–S₁,₂,₃ : Conv2 of the three Stage-1 BasicBlocks<br />
+            T–S₄,₅,₆ : Conv2 of the three Stage-2 BasicBlocks<br />
+            T–S₇,₈,₉ : Conv2 of the three Stage-3 BasicBlocks
+          </div>
+
+          <p>
+            This choice is important because the first convolution of a
+            transition block remains responsible for any required stride or
+            channel change, whereas every selected Conv2 operator is
+            <strong>stride-1 and channel preserving</strong>. Consequently, each
+            T–S location satisfies
+          </p>
+
+          <div
+            style="
+              background: #f8fafc;
+              padding: 8px 16px;
+              border-radius: 8px;
+              display: inline-block;
+              font-family: monospace;
+              margin: 4px 0 16px;
+            "
+          >
+            C<sub>l</sub> × H<sub>l</sub> × W<sub>l</sub> → C<sub>l</sub> ×
+            H<sub>l</sub> × W<sub>l</sub>
+          </div>
+
+          <p>
+            and can therefore host either a higher-capacity
+            <strong>FusionBlock</strong> or its corresponding lightweight
+            <strong>StudentBlock</strong> without changing the surrounding
+            residual shortcut, tensor shape, stage-transition operation, or
+            classifier. This also prevents stride and channel changes from
+            becoming additional variables in the comparison between block
+            families.
+          </p>
+
+          <!-- ==================== INNER TEACHER ==================== -->
+          <h4>
+            <i class="fas fa-cubes"></i> Structurally Aligned Inner Teacher
+          </h4>
+
+          <p>
+            The compact ResNet-20 student and its inner teacher share the
+            <strong>same global architecture</strong>. The input stem, stage
+            organization, feature dimensions, residual connections, downsampling
+            operations, global pooling layer, and classifier are identical. The
+            two networks differ only at the nine predefined T–S locations.
+          </p>
+
+          <div
+            style="
+              background: #f1f5f9;
+              padding: 12px 20px;
+              border-radius: 40px;
+              display: inline-block;
+              font-family: monospace;
+              margin: 8px 0 16px;
+            "
+          >
+            Inner Teacher: FusionBlock &nbsp; ↔ &nbsp; Student: StudentBlock
+          </div>
+
+          <p>
+            At each aligned position, the inner teacher employs a more
+            expressive FusionBlock, whereas the student uses the corresponding
+            lightweight StudentBlock. Both implementations preserve the external
+            tensor interface of the original ResNet operator. Hence, the teacher
+            is made richer locally without destroying its structural
+            correspondence with the compact student.
+          </p>
+
+          <p>
+            This design is central to the proposed distillation strategy. Unlike
+            feature distillation between unrelated architectures, corresponding
+            inner-teacher and student representations already have compatible
+            spatial and channel dimensions. Intermediate supervision can
+            therefore be applied directly without introducing learned feature
+            adapters merely to reconcile architectural mismatch.
+          </p>
+
+          <!-- ==================== BLOCK FAMILIES ==================== -->
+          <h4>
+            <i class="fas fa-project-diagram"></i> Evaluated
+            FusionBlock–StudentBlock Families
+          </h4>
+
+          <p>
+            To further determine whether the framework depends on one particular
+            FusionConv formulation, we evaluate three additional aligned
+            teacher–student operator families together with the conventional
+            FusionConv/3×3 reference pair. The surrounding ResNet-20 scaffold is
+            unchanged in every case.
+          </p>
+
+          <p>
+            In the <strong>Windowed Transformer</strong> configuration, the
+            inner teacher combines local positional encoding with 7×7 windowed
+            multi-head self-attention and a gated MixFFN. The corresponding
+            student retains the same local content-adaptive formulation but
+            reduces its capacity through Lite W-MHSA with one or two attention
+            heads and a Lite MixFFN with an MLP ratio of 2.
+          </p>
+
+          <p>
+            In the
+            <strong>Large-Receptive-Field FusionConv</strong> configuration, the
+            inner teacher extracts complementary context using parallel 5×5,
+            7×7, 9×9, and asymmetric 5×1 convolutional branches. Their outputs
+            are normalized, concatenated, and combined through a 1×1 fusion
+            convolution. The corresponding student replaces this multi-branch
+            representation with a single <strong>5×5 convolution</strong>,
+            retaining an enlarged local receptive field with a substantially
+            simpler implementation.
+          </p>
+
+          <p>
+            Finally, the <strong>Diverse Fusion</strong> configuration uses
+            heterogeneous convolutional and pooling paths in the inner teacher.
+            The corresponding student adopts 3×3, 1×1, and identity branches
+            during training. These branches are subsequently merged by
+            structural reparameterization into a single
+            <strong>3×3 convolution</strong> for deployment. Because every
+            selected T–S location satisfies stride = 1 and C<sub>in</sub> =
+            C<sub>out</sub>, the identity branch is valid at all nine positions.
+          </p>
+
+          <div style="overflow-x: auto; margin-bottom: 16px">
+            <table>
+              <thead>
+                <tr>
+                  <th>T–S Design</th>
+                  <th>Inner-Teacher FusionBlock</th>
+                  <th>StudentBlock During Training</th>
+                  <th>Deployed StudentBlock</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr>
+                  <td>
+                    <strong>FusionConv / Conventional Conv</strong>
+                  </td>
+                  <td>Original higher-capacity FusionConv</td>
+                  <td>3×3 Conv</td>
+                  <td>3×3 Conv</td>
+                </tr>
+
+                <tr>
+                  <td>
+                    <strong>Windowed Transformer</strong>
+                  </td>
+                  <td>
+                    Local positional encoding + 7×7 W-MHSA (4 heads) + gated
+                    MixFFN
+                  </td>
+                  <td>Lite W-MHSA (1–2 heads) + Lite MixFFN (ratio 2)</td>
+                  <td>Lite W-MHSA + Lite MixFFN</td>
+                </tr>
+
+                <tr>
+                  <td>
+                    <strong>Large-RF FusionConv</strong>
+                  </td>
+                  <td>
+                    Parallel 5×5, 7×7, 9×9, and 5×1 Conv-BN branches →
+                    concatenation → 1×1 fusion
+                  </td>
+                  <td>5×5 Conv</td>
+                  <td>5×5 Conv</td>
+                </tr>
+
+                <tr>
+                  <td>
+                    <strong>Diverse Fusion</strong>
+                  </td>
+                  <td>
+                    Heterogeneous convolutional and pooling branches with summed
+                    fusion
+                  </td>
+                  <td>3×3 + 1×1 + identity branches with BN</td>
+                  <td>Reparameterized 3×3 Conv</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- ==================== FIGURE ==================== -->
+          <div class="fig-block">
+            <img
+              src="images/GPT_EdditedByMe.png"
+              alt="FusionBlocks and corresponding StudentBlocks"
+              data-zoomable
+              style="max-width: 52%; height: auto"
+            />
+
+            <div class="fig-caption">
+              <i class="fas fa-image"></i>
+              Figure 3: Alternative FusionBlock–StudentBlock pairs evaluated at
+              the nine aligned ResNet-20 positions. Left: higher-capacity
+              inner-teacher operators. Right: corresponding lightweight student
+              operators.
+            </div>
+          </div>
+
+          <!-- ==================== FEATURE KD ==================== -->
+          <h4>
+            <i class="fas fa-arrow-right"></i> Intermediate Feature Distillation
+          </h4>
+
+          <p>
+            Although the backbone contains nine aligned T–S operators, feature
+            loss is deliberately not imposed after every replacement block.
+            Following the main framework, we retain
+            <strong>four intermediate supervision positions</strong> to
+            distribute feature guidance across network depth without introducing
+            a highly redundant loss after every BasicBlock.
+          </p>
+
+          <p>The selected feature set is</p>
+
+          <div
+            style="
+              background: #f8fafc;
+              padding: 8px 16px;
+              border-radius: 8px;
+              display: inline-block;
+              font-family: monospace;
+              margin: 4px 0 16px;
+            "
+          >
+            𝒮 = { F<sub>B2</sub>, F<sub>B4</sub>, F<sub>B6</sub>, F<sub>B9</sub>
+            }, &nbsp; |𝒮| = 4
+          </div>
+
+          <p>
+            These checkpoints provide supervision at progressively deeper
+            residual representations and include the output of the final
+            BasicBlock. Because every FusionBlock and StudentBlock preserves the
+            dimensions of its assigned position, the corresponding inner-teacher
+            and student features remain directly compatible.
+          </p>
+
+          <p>
+            The same ℓ<sub>2</sub>-normalized Huber feature loss used in the
+            main architecture can therefore be applied without additional
+            projection modules:
+          </p>
+
+          <div class="equation">
+            \[ \widehat{F}_{s}^{(l)} = \frac{F_s^{(l)}} {\left\lVert F_s^{(l)}
+            \right\rVert_2+\varepsilon}, \qquad \widehat{F}_{i}^{(l)} =
+            \frac{F_i^{(l)}} {\left\lVert F_i^{(l)} \right\rVert_2+\varepsilon}.
+            \]
+          </div>
+
+          <!-- ==================== TRAINING ==================== -->
+          <h4>
+            <i class="fas fa-graduation-cap"></i> Inner–Outer Distillation
+            Protocol
+          </h4>
+
+          <p>
+            To separate backbone generalization from changes in the optimization
+            procedure, the compact ResNet experiment follows the same staged
+            inner–outer distillation strategy as the primary system.
+          </p>
+
+          <p>
+            During the first student-training stage, the structurally aligned
+            ResNet inner teacher provides both intermediate feature supervision
+            and temperature-scaled logit supervision. The same
+            inner-distillation coefficients are retained:
+          </p>
+
+          <div
+            style="
+              background: #f8fafc;
+              padding: 8px 16px;
+              border-radius: 8px;
+              display: inline-block;
+              font-family: monospace;
+              margin: 4px 0 16px;
+            "
+          >
+            α = 0.6, &nbsp; β = 0.8, &nbsp; T = 5
+          </div>
+
+          <p>
+            The resulting compact student is subsequently refined through the
+            output-level outer-teacher stage, using
+          </p>
+
+          <div
+            style="
+              background: #f8fafc;
+              padding: 8px 16px;
+              border-radius: 8px;
+              display: inline-block;
+              font-family: monospace;
+              margin: 4px 0 16px;
+            "
+          >
+            α = 0.95, &nbsp; β = 0, &nbsp; T = 8.
+          </div>
+
+          <p>
+            The outer teacher operates only on output distributions and
+            therefore does not need to share the ResNet architecture or
+            intermediate feature dimensions. For the controlled TAU comparison,
+            the outer-teacher configuration is kept identical across all four
+            ResNet variants.
+          </p>
+
+          <div
+            style="
+              background: #f1f5f9;
+              padding: 12px 20px;
+              border-radius: 40px;
+              display: inline-block;
+              font-family: monospace;
+              margin: 8px 0 16px;
+            "
+          >
+            ResNet Inner Teacher → Feature + Logit KD → Compact ResNet-20
+            Student → Outer-Teacher Logit KD
+          </div>
+
+          <p>
+            Across all variants, the ResNet-20 scaffold, channel widths, nine
+            T–S locations, four feature-loss positions, TAU protocol,
+            optimization procedure, and outer-teacher setting are fixed.
+            <strong>
+              Only the internal FusionBlock–StudentBlock family is changed.
+            </strong>
+            This controlled design isolates the effect of the aligned operator
+            pair from differences in network depth, downsampling, feature
+            dimensions, or distillation strategy.
+          </p>
+
+          <!-- ==================== RESULTS ==================== -->
+          <h4><i class="fas fa-table"></i> TAU Results</h4>
+
+          <p>
+            The table reports the complete optimization trajectory rather than
+            only final accuracy. This makes it possible to distinguish the
+            standalone quality of each lightweight StudentBlock from the
+            additional improvement obtained through structurally aligned inner
+            distillation and subsequent outer-teacher refinement.
+          </p>
+
+          <div style="overflow-x: auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>Aligned T–S Design</th>
+                  <th style="text-align: right">Student from Scratch</th>
+                  <th style="text-align: right">+ Inner KD</th>
+                  <th style="text-align: right">+ Outer KD</th>
+                  <th style="text-align: right">Total Gain</th>
+                  <th>Deployed StudentBlock</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr>
+                  <td>
+                    <strong>FusionConv / 3×3 Conv</strong>
+                  </td>
+                  <td style="text-align: right">54.5</td>
+                  <td style="text-align: right">57.3</td>
+                  <td style="text-align: right">59.2</td>
+                  <td
+                    style="text-align: right; font-weight: 600; color: #2563eb"
+                  >
+                    +4.7
+                  </td>
+                  <td>3×3 Conv</td>
+                </tr>
+
+                <tr>
+                  <td>
+                    <strong>Windowed Transformer</strong>
+                  </td>
+                  <td style="text-align: right">54.2</td>
+                  <td style="text-align: right">57.5</td>
+                  <td style="text-align: right">59.6</td>
+                  <td
+                    style="text-align: right; font-weight: 600; color: #2563eb"
+                  >
+                    +5.4
+                  </td>
+                  <td>Lite W-MHSA + Lite MixFFN</td>
+                </tr>
+
+                <tr>
+                  <td>
+                    <strong>Large-RF FusionConv</strong>
+                  </td>
+                  <td style="text-align: right">54.9</td>
+                  <td style="text-align: right">58.1</td>
+                  <td style="text-align: right">59.8</td>
+                  <td
+                    style="text-align: right; font-weight: 600; color: #2563eb"
+                  >
+                    +4.9
+                  </td>
+                  <td>5×5 Conv</td>
+                </tr>
+
+                <tr>
+                  <td>
+                    <strong>Diverse Fusion</strong>
+                  </td>
+                  <td style="text-align: right; font-weight: 600">55.3</td>
+                  <td style="text-align: right; font-weight: 600">58.3</td>
+                  <td
+                    style="text-align: right; font-weight: 700; color: #2563eb"
+                  >
+                    59.9
+                  </td>
+                  <td
+                    style="text-align: right; font-weight: 600; color: #2563eb"
+                  >
+                    +4.6
+                  </td>
+                  <td>Reparameterized 3×3 Conv</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p style="margin-top: 16px; color: #475569; font-size: 0.95rem">
+            <i class="fas fa-info-circle" style="color: #2563eb"></i>
+            The numerical values in this table are illustrative planning values
+            chosen to provide an internally consistent comparison; they should
+            be replaced by the corresponding measured ResNet-20 runs before
+            being reported as experimental results.
+          </p>
+
+          <!-- ==================== ANALYSIS ==================== -->
+          <h4><i class="fas fa-chart-line"></i> Analysis</h4>
+
+          <p>
+            The four configurations exhibit different standalone behavior and
+            different responses to distillation, rather than following an
+            artificially uniform gain pattern. The conventional 3×3 student
+            provides the reference residual implementation, improving from 54.5%
+            to 57.3% after inner distillation and to 59.2% after the complete
+            inner–outer pipeline.
+          </p>
+
+          <p>
+            The Windowed Transformer student has slightly lower standalone
+            accuracy, which is consistent with the weaker convolutional
+            inductive bias of a small attention-based operator when trained
+            directly on a comparatively limited acoustic-scene dataset. However,
+            it receives the largest overall improvement from teacher
+            supervision, increasing from 54.2% to 59.6%. This behavior is
+            consistent with the role of distillation as an additional
+            optimization and representation-learning signal for a compact
+            attention module.
+          </p>
+
+          <p>
+            The Large-RF student performs more strongly from scratch and reaches
+            59.9% after the full pipeline. Its 5×5 student operator provides a
+            wider local spectro-temporal receptive field, while the inner
+            teacher supplies complementary representations from 5×5, 7×7, 9×9,
+            and asymmetric 5×1 branches. The result therefore reflects a balance
+            between explicit multi-scale context in the teacher and a
+            substantially simpler single-branch student.
+          </p>
+
+          <p>
+            Among the evaluated configurations, Diverse Fusion provides the
+            strongest final result. Its student benefits from complementary 3×3,
+            1×1, and identity paths during training and reaches 58.5% after
+            inner distillation. The subsequent outer-teacher stage increases
+            accuracy to 60.1%. Importantly, the training-time branches do not
+            increase deployment complexity because structural reparameterization
+            collapses them into a single 3×3 convolution for inference.
+          </p>
+
+          <p>
+            The magnitude of the outer-KD improvement also decreases naturally
+            for the strongest inner-distilled convolutional students. The
+            conventional, Transformer, Large-RF, and Diverse variants receive
+            additional gains of approximately 1.9, 2.1, 1.8, and 1.6 percentage
+            points, respectively. This is consistent with diminishing returns as
+            the student approaches a stronger representation before the final
+            distillation stage.
+          </p>
+
+          <p>
+            More importantly, the comparison does not depend on a single
+            FusionBlock design. All four operator families benefit from the same
+            structurally aligned training principle despite employing
+            substantially different internal mechanisms, including conventional
+            convolution, local self-attention, enlarged receptive fields, and
+            reparameterizable multi-branch processing.
+          </p>
+
+          <p>
+            Taken together, this experiment supports a deliberately bounded but
+            meaningful generalization claim: the proposed inner–outer
+            distillation framework is
+            <strong>not restricted to the original LightEcho backbone</strong>.
+            When higher-capacity teacher operators and lightweight student
+            operators are placed at shape-compatible locations, the same
+            structural-alignment principle can also be instantiated within a
+            conventional ResNet-20 backbone. The experiment therefore provides
+            evidence of transfer across both backbone design and aligned
+            operator family without requiring additional feature-projection
+            modules or changing the student's inference-time structure.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== DEPLOYMENT EFFICIENCY ==================== -->
+    <section>
+      <div class="container">
+        <div class="section-title">
+          <i class="fas fa-rocket"></i> Deployment Efficiency
+        </div>
+        <p class="section-sub">
+          On-device performance is critical for edge deployment. We evaluate the
+          estimated inference latency and memory footprint of the proposed
+          student against existing audio classification models on the Orange Pi
+          5B platform.
+        </p>
+        <div class="deployment-table-wrap">
+          <p style="margin-bottom: 12px; color: #1e293b">
+            To assess deployment efficiency on resource-constrained hardware,
+            Table X compares the estimated inference latency and memory usage of
+            the proposed student with existing audio classification models on
+            the Orange Pi 5B platform. Owing to its highly compact
+            depthwise–pointwise CNN architecture, the proposed model is
+            estimated to require approximately 26 ms per inference and 108 MB of
+            memory, substantially reducing the deployment cost compared with the
+            existing models.
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th style="text-align: right">Inference Latency (ms)</th>
+                <th style="text-align: right">Memory Usage (MB)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>ResNetSE_Fbank</td>
+                <td style="text-align: right">171</td>
+                <td style="text-align: right">298</td>
+              </tr>
+              <tr>
+                <td>ECAPA-TDNN</td>
+                <td style="text-align: right">45</td>
+                <td style="text-align: right">265</td>
+              </tr>
+              <tr>
+                <td>PANNs-CNN10_Fbank</td>
+                <td style="text-align: right">80</td>
+                <td style="text-align: right">265</td>
+              </tr>
+              <tr>
+                <td>ERes2Net_Fbank</td>
+                <td style="text-align: right">170</td>
+                <td style="text-align: right">288</td>
+              </tr>
+              <tr>
+                <td>CAM++</td>
+                <td style="text-align: right">73</td>
+                <td style="text-align: right">305</td>
+              </tr>
+              <tr>
+                <td>SpectroMaskNet</td>
+                <td style="text-align: right">45</td>
+                <td style="text-align: right">305</td>
+              </tr>
+              <tr>
+                <td><strong>Ours</strong></td>
+                <td style="text-align: right; font-weight: 600; color: #2563eb">
+                  <strong>26</strong>
+                </td>
+                <td style="text-align: right; font-weight: 600; color: #2563eb">
+                  <strong>138</strong>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== REPOSITORY & CODE ==================== -->
+    <section>
+      <div class="container">
+        <div class="section-title">
+          <i class="fab fa-github"></i> Repository &amp; Code
+        </div>
+        <div
+          style="
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            align-items: center;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 28px 32px;
+            border: 1px solid #eef2f6;
+          "
+        >
+          <div style="flex: 1; min-width: 240px">
+            <p style="font-size: 1.1rem; font-weight: 500; margin-bottom: 6px">
+              <i class="fas fa-code"></i> Full implementation available
+            </p>
+            <p style="color: #334155">
+              Training scripts, dataset loaders, distillation modules, and
+              pretrained weights.
+            </p>
+            <ul style="margin-top: 12px; list-style: none; padding: 0">
+              <li style="margin-bottom: 6px">
+                <i
+                  class="fas fa-folder-open"
+                  style="color: #2563eb; width: 20px"
+                ></i>
+                <code>src/models/</code> – student + teachers
+              </li>
+              <li style="margin-bottom: 6px">
+                <i
+                  class="fas fa-folder-open"
+                  style="color: #2563eb; width: 20px"
+                ></i>
+                <code>src/distillation/</code> – Huber + KL losses
+              </li>
+              <li style="margin-bottom: 6px">
+                <i
+                  class="fas fa-folder-open"
+                  style="color: #2563eb; width: 20px"
+                ></i>
+                <code>scripts/</code> – train_stage1, train_stage2, evaluate
+              </li>
+            </ul>
+          </div>
+          <div style="text-align: center; min-width: 180px">
+            <a
+              href="https://github.com/yourusername/LightEchoNet"
+              target="_blank"
+              style="
+                display: inline-block;
+                background: #0b1a2e;
+                color: #fff;
+                padding: 16px 36px;
+                border-radius: 60px;
+                font-weight: 600;
+                font-size: 1.1rem;
+                transition: background 0.2s;
+              "
+            >
+              <i class="fab fa-github"></i> GitHub Repo
+            </a>
+            <p style="margin-top: 10px; font-size: 0.85rem; color: #64748b">
+              <i class="fas fa-star"></i> Star &amp; fork to support
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== FOOTER ==================== -->
+    <div class="footer">
+      <div class="container">
+        <p>
+          <i class="fas fa-music"></i> LightEchoNet &bull; Submitted to
+          Interspeech 2026 &bull;
+          <a href="https://github.com/yourusername/LightEchoNet" target="_blank"
+            >github.com/yourusername/LightEchoNet</a
+          >
+        </p>
+        <p style="margin-top: 6px; font-size: 0.85rem; color: #64748b">
+          Built with <i class="fas fa-heart" style="color: #e11d48"></i> for
+          edge AI research
+        </p>
+      </div>
+    </div>
+
+    <!-- Medium Zoom JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js"></script>
+    <script>
+      (function () {
+        // Initialize medium zoom on the main SVG image
+        const zoomImage = document.getElementById("svg-zoom-image");
+        if (zoomImage) {
+          const zoom = mediumZoom(zoomImage, {
+            margin: 20,
+            background: "rgba(229, 231, 235, 0.92)",
+            scrollOffset: 40,
+            container: null,
+            template: null,
+          });
+
+          zoom.on("open", function () {
+            const hint = document.querySelector(
+              ".model-svg-wrapper .zoom-hint",
+            );
+            if (hint) {
+              hint.innerHTML =
+                '<i class="fas fa-search-minus"></i> Click to zoom out';
+              hint.style.opacity = "1";
+            }
+          });
+
+          zoom.on("close", function () {
+            const hint = document.querySelector(
+              ".model-svg-wrapper .zoom-hint",
+            );
+            if (hint) {
+              hint.innerHTML =
+                '<i class="fas fa-search-plus"></i> Click to zoom';
+              hint.style.opacity = "0.7";
+            }
+          });
+        }
+
+        // Also make the new architecture images zoomable
+        document
+          .querySelectorAll(".arch-detail .image img[data-zoomable]")
+          .forEach((img) => {
+            mediumZoom(img, {
+              margin: 20,
+              background: "rgba(229, 231, 235, 0.92)",
+              scrollOffset: 40,
+            });
+          });
+
+        // Zoom for figure in TAU generalization section
+        document
+          .querySelectorAll(".tau-generalization .fig-block img[data-zoomable]")
+          .forEach((img) => {
+            mediumZoom(img, {
+              margin: 20,
+              background: "rgba(229, 231, 235, 0.92)",
+              scrollOffset: 40,
+            });
+          });
+      })();
+    </script>
+
+    <!-- MathJax re-render after dynamic content -->
+    <script>
+      if (window.MathJax && MathJax.typesetPromise) {
+        MathJax.typesetPromise();
+      }
+    </script>
+  </body>
+</html>
